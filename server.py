@@ -74,10 +74,10 @@ def check_winner():
         result = check_diagonals()
     return result
 
-#Socket program
+#Socket programme
 def start_server():
-    #Binding to port 9999
-    #Only two clients can connect 
+    #Port par défaut : 9999
+    #Seulement deux joueurs en meme tps max
     try:
         s.bind((host, port))
         print("Tic Tac Toe server started \nBinding to port", port)
@@ -87,8 +87,7 @@ def start_server():
         print("Server binding error:", e)
     
 
-#Accept player
-#Send player number
+#envoi id player
 def accept_players():
     try:
         for i in range(2):

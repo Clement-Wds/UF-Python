@@ -15,26 +15,25 @@ bottomMsg = ""
 msg = "Waiting for peer"
 currentPlayer = 0
 xy = (-1, -1)
-allow = 0 #allow handling mouse events
+allow = 0 #Autorisation click souris
 matrix = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
 
-#Create worker threads
 def create_thread(target):
-    t = threading.Thread(target = target) #argument - target function
+    t = threading.Thread(target = target)
     t.daemon = True
     t.start()
 
-#initialize
+#Initialisation Pygame
 pygame.init()
 
 width = 600
 height = 550
 screen = pygame.display.set_mode((width, height))
 
-#set title
+#Titre
 pygame.display.set_caption("Tic Tac Toe")
 
-#fonts
+#Polices
 bigfont = pygame.font.Font('freesansbold.ttf', 64)
 smallfont = pygame.font.Font('freesansbold.ttf', 32)
 backgroundColor = (255, 255, 255)
@@ -49,10 +48,10 @@ def buildScreen(bottomMsg, string, playerColor = subtitleColor):
     elif "Two" in string or "2" in string:
         playerColor = playerTwoColor
 
-    #vertical lines
+    #traçage lignes verticales
     pygame.draw.line(screen, lineColor, (250-2, 150), (250-2, 450), 4)
     pygame.draw.line(screen, lineColor, (350-2, 150), (350-2, 450), 4)
-    #horizontal lines
+    #traçage lignes horizontales
     pygame.draw.line(screen, lineColor, (150, 250-2), (450, 250-2), 4)
     pygame.draw.line(screen, lineColor, (150, 350-2), (450, 350-2), 4)
 
@@ -64,7 +63,7 @@ def buildScreen(bottomMsg, string, playerColor = subtitleColor):
 
 def centerMessage(msg, color = titleColor):
     pos = (100, 480)
-    # screen.fill(backgroundColor)
+    
     if "One" in msg or "1" in msg:
         color = playerOneColor
     elif "Two" in msg or "2" in msg:
@@ -78,10 +77,10 @@ def printCurrent(current, pos, color):
 
 def printMatrix(matrix):
     for i in range(3):
-        #When row increases, y changes
+        #changement dans la ligne y
         y = int((i + 1.75) * 100) 
         for j in range(3):
-            #When col increases, x changes
+            #changement dans la colonne x
             x =  int((j + 1.75) * 100)
             current = " "
             color = titleColor
@@ -110,9 +109,9 @@ def handleMouseEvent(pos):
     if(x < 150 or x > 450 or y < 150 or y > 450):
         xy = (-1, -1)
     else:
-        # When x increases, column changes
+        # colonne x
         col = int(x/100 - 1.5)
-        # When y increases, row changes
+        # ligne y
         row = int(y/100 - 1.5)
         print("({}, {})".format(row,col))
         if validate_input(row, col):
