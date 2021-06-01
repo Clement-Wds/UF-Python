@@ -11,15 +11,14 @@ playerOne = 1
 playerTwo = 2
 
 playerConn = list()
-playerAddr = list()
-
+playerAddr = list()       
 
 def get_input(currentPlayer):
     if currentPlayer == playerOne:
-        player = "Tour du joueur 1"
+        player = "Player One's Turn"
         conn = playerConn[0]
     else:
-        player = "Tour du joueur 2"
+        player = "Player Two's Turn"
         conn = playerConn[1]
     print(player)
     send_common_msg(player)
@@ -34,9 +33,8 @@ def get_input(currentPlayer):
         send_common_msg("Matrix")
         send_common_msg(str(matrix))
     except:
-        conn.send("Erreur".encode())
-        print("Erreur , Reessayez..")
-
+        conn.send("Error".encode())
+        print("Error occured! Try again..")
 
 def check_rows():
 
@@ -48,7 +46,6 @@ def check_rows():
                 break
     return result
 
-
 def check_columns():
 
     result = 0
@@ -59,7 +56,6 @@ def check_columns():
                 break
     return result
 
-
 def check_diagonals():
 
     result = 0
@@ -68,7 +64,6 @@ def check_diagonals():
     elif matrix[0][2] == matrix[1][1] and matrix[1][1] == matrix[2][0]:
         result = matrix[0][2]
     return result
-
 
 def check_winner():
     result = 0
@@ -79,71 +74,71 @@ def check_winner():
         result = check_diagonals()
     return result
 
-
+#Socket program
 def start_server():
-    # Utilisation du port par défaut 9999
-    # Seulement deux clients peuvent se connecter
+    #Binding to port 9999
+    #Only two clients can connect 
     try:
         s.bind((host, port))
-        print("Le serveur Tictactoe a demarre \nConnexion au port", port)
-        s.listen(2)
+        print("Tic Tac Toe server started \nBinding to port", port)
+        s.listen(2) 
         accept_players()
     except socket.error as e:
-        print("Erreur de connexion:", e)
+        print("Server binding error:", e)
+    
 
-
+#Accept player
+#Send player number
 def accept_players():
     try:
         for i in range(2):
             conn, addr = s.accept()
-            msg = "<<< Vous etes joueur {} >>>".format(i+1)
+            msg = "<<< You are player {} >>>".format(i+1)
             conn.send(msg.encode())
 
             playerConn.append(conn)
             playerAddr.append(addr)
-            print("Joueur {} - [{}:{}]".format(i+1, addr[0], str(addr[1])))
-
+            print("Player {} - [{}:{}]".format(i+1, addr[0], str(addr[1])))
+    
         start_game()
         s.close()
     except socket.error as e:
-        print("Erreur connexion du joueur", e)
+        print("Player connection error", e)
     except KeyboardInterrupt:
-        print("\nKeyboard Interrupt")
-        exit()
+            print("\nKeyboard Interrupt")
+            exit()
     except Exception as e:
-        print("Erreur :", e)
-
+        print("Error occurred:", e)
 
 def start_game():
     result = 0
     i = 0
-    while result == 0 and i < 9:
-        if (i % 2 == 0):
+    while result == 0 and i < 9 :
+        if (i%2 == 0):
             get_input(playerOne)
         else:
             get_input(playerTwo)
         result = check_winner()
         i = i + 1
-
+    
     send_common_msg("Over")
 
     if result == 1:
-        lastmsg = "Le Joueur 1 a gagné !!"
+        lastmsg = "Player One is the winner!!"
     elif result == 2:
-        lastmsg = "Le Joueur 2 a gagné !!"
+        lastmsg = "Player Two is the winner!!"
     else:
-        lastmsg = "Egalité parfaite, INCROYABLE !!"
+        lastmsg = "Draw game!! Try again later!"
 
     send_common_msg(lastmsg)
     time.sleep(10)
     for conn in playerConn:
         conn.close()
-
+    
 
 def send_common_msg(text):
     playerConn[0].send(text.encode())
     playerConn[1].send(text.encode())
     time.sleep(1)
-
 
 start_server()
