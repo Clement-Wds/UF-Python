@@ -8,4 +8,4 @@ INFO B2 B
 
 <hr>
 
-© 2021 - Clément Walsh de Serrant - https://clementwds.com/
+https://clementwds.com/
