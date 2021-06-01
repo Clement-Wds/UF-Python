@@ -74,7 +74,6 @@ def check_winner():
         result = check_diagonals()
     return result
 
-#Socket programgoo
 def start_server():
 #Utilisation du port par défaut 9999
     #Seulement deux clients peuvent se connecter 
@@ -106,7 +105,7 @@ def accept_players():
             print("\nKeyboard Interrupt")
             exit()
     except Exception as e:
-        print("Error occurred:", e)
+        print("Erreur :", e)
 
 def start_game():
     result = 0
@@ -122,11 +121,11 @@ def start_game():
     send_common_msg("Over")
 
     if result == 1:
-        lastmsg = "Player One is the winner!!"
+        lastmsg = "Le Joueur 1 a gagné !!"
     elif result == 2:
-        lastmsg = "Player Two is the winner!!"
+        lastmsg = "Le Joueur 2 a gagné !!"
     else:
-        lastmsg = "Draw game!! Try again later!"
+        lastmsg = "Egalité parfaite, INCROYABLE !!"
 
     send_common_msg(lastmsg)
     time.sleep(10)
