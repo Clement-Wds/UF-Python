@@ -34,10 +34,6 @@ screen = pygame.display.set_mode((width, height))
 #set title
 pygame.display.set_caption("Tic Tac Toe")
 
-# #set icon
-# icon = pygame.image.load("tictactoe.png")
-# pygame.display.set_icon(icon)
-
 #fonts
 bigfont = pygame.font.Font('freesansbold.ttf', 64)
 smallfont = pygame.font.Font('freesansbold.ttf', 32)
