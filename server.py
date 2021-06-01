@@ -1,59 +1,142 @@
 import socket
-from _thread import *
-import sys
+import pickle
+import time
 
-socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s = socket.socket()
+host = ""
+port = 9999
+matrix = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
 
-server = 'localhost'
-port = 5555
+playerOne = 1
+playerTwo = 2
 
-server_ip = socket.gethostbyname(server)
+playerConn = list()
+playerAddr = list()       
 
-try:
-        socket.bind((server, port))
+def get_input(currentPlayer):
+    if currentPlayer == playerOne:
+        player = "Player One's Turn"
+        conn = playerConn[0]
+    else:
+        player = "Player Two's Turn"
+        conn = playerConn[1]
+    print(player)
+    send_common_msg(player)
+    try:
+        conn.send("Input".encode())
+        data = conn.recv(2048 * 10)
+        conn.settimeout(20)
+        dataDecoded = data.decode().split(",")
+        x = int(dataDecoded[0])
+        y = int(dataDecoded[1])
+        matrix[x][y] = currentPlayer
+        send_common_msg("Matrix")
+        send_common_msg(str(matrix))
+    except:
+        conn.send("Error".encode())
+        print("Error occured! Try again..")
 
-except socket.error as error:
-        print(str(error))
+def check_rows():
+    
+    result = 0
+    for i in range(3):
+        if matrix[i][0] == matrix[i][1] and matrix[i][1] == matrix[i][2]:
+            result = matrix[i][0]
+            if result != 0:
+                break
+    return result
 
-socket.listen(2)
-print('En attente de connexion...')
+def check_columns():
+    
+    result = 0
+    for i in range(3):
+        if matrix[0][i] == matrix[1][i] and matrix[1][i] == matrix[2][i]:
+            result = matrix[0][i]
+            if result != 0:
+                break
+    return result
 
-currentId = "0"
-position = ["0:50,50", "1:100,100"]
+def check_diagonals():
+    
+    result = 0
+    if matrix[0][0] == matrix[1][1] and matrix[1][1] == matrix[2][2]:
+        result = matrix[0][0]
+    elif matrix[0][2] == matrix[1][1] and matrix[1][1] == matrix[2][0]:
+        result = matrix[0][2]
+    return result
 
-def threaded_client(connection):
-        global currentId, position
-        connection.send(str.encode(currentId))
-        currentId = "1"
-        reply = ''
-        while True:
-                try:
-                        data = connection.recv(2048)
-                        reply = data.decode('utf-8')
-                        if not data:
-                                connection.send(str.encode("Au Revoir"))
-                                break
-                        else:
-                                print("Reçu : " + reply)
-                                array = reply.split(":")
-                                id = int(array[0])
-                                position[id] = reply
+def check_winner():
+    result = 0
+    result = check_rows()
+    if result == 0:
+        result = check_columns()
+    if result == 0:
+        result = check_diagonals()
+    return result
 
-                                if id == 0:
-                                        nid = 1
-                                if id == 1:
-                                        nid = 0
-                                reply = position[nid][:]
-                                print("Envoi : " + reply)
+#Socket programgoo
+def start_server():
+#Utilisation du port par défaut 9999
+    #Seulement deux clients peuvent se connecter 
+    try:
+        s.bind((host, port))
+        print("Tic Tac Toe server started \nBinding to port", port)
+        s.listen(2) 
+        accept_players()
+    except socket.error as e:
+        print("Server binding error:", e)
+    
 
-                        connection.sendall(str.encode(reply))
-                except:
-                        break
-        print("Connexion terminé")
-        connection.close()
+def accept_players():
+    try:
+        for i in range(2):
+            conn, addr = s.accept()
+            msg = "<<< You are player {} >>>".format(i+1)
+            conn.send(msg.encode())
 
-while True:
-        connection, address = socket.accept()
-        print("Connecté à : ", address)
+            playerConn.append(conn)
+            playerAddr.append(addr)
+            print("Player {} - [{}:{}]".format(i+1, addr[0], str(addr[1])))
+    
+        start_game()
+        s.close()
+    except socket.error as e:
+        print("Player connection error", e)
+    except KeyboardInterrupt:
+            print("\nKeyboard Interrupt")
+            exit()
+    except Exception as e:
+        print("Error occurred:", e)
 
-        start_new_thread(threaded_client, (connection,))
+def start_game():
+    result = 0
+    i = 0
+    while result == 0 and i < 9 :
+        if (i%2 == 0):
+            get_input(playerOne)
+        else:
+            get_input(playerTwo)
+        result = check_winner()
+        i = i + 1
+    
+    send_common_msg("Over")
+
+    if result == 1:
+        lastmsg = "Player One is the winner!!"
+    elif result == 2:
+        lastmsg = "Player Two is the winner!!"
+    else:
+        lastmsg = "Draw game!! Try again later!"
+
+    send_common_msg(lastmsg)
+    time.sleep(10)
+    for conn in playerConn:
+        conn.close()
+    
+
+def send_common_msg(text):
+    playerConn[0].send(text.encode())
+    playerConn[1].send(text.encode())
+    time.sleep(1)
+
+start_server()
